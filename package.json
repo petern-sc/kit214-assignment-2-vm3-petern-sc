@@ -1,0 +1,20 @@
+{
+  "name": "kit214-assignment-2-vm3-petern-sc",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/petern-sc/kit214-assignment-2-vm3-petern-sc#readme",
+  "bugs": {
+    "url": "https://github.com/petern-sc/kit214-assignment-2-vm3-petern-sc/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/petern-sc/kit214-assignment-2-vm3-petern-sc.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "esm",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  }
+}
