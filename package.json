@@ -12,9 +12,20 @@
   },
   "license": "ISC",
   "author": "",
-  "type": "esm",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "dev": "tsx src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/express": "^5.0.0",
+    "typescript": "^5.7.2",
+    "tsx": "^4.19.2"
+  },
+  "dependencies": {
+    "express": "^5.0.1"
   }
 }
