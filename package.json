@@ -20,12 +20,15 @@
     "build": "tsc"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
     "@types/express": "^5.0.0",
-    "typescript": "^5.7.2",
-    "tsx": "^4.19.2"
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   },
   "dependencies": {
-    "express": "^5.0.1"
+    "express": "^5.0.1",
+    "knex": "^3.3.0",
+    "mysql2": "^3.24.4",
+    "zod": "^4.6.5"
   }
 }
