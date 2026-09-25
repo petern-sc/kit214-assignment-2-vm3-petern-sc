@@ -60,3 +60,11 @@ export async function updateRoom(room: Room): Promise<Room | null> {
     return updatedRecord ? toRoom(updatedRecord) : null;
   });
 }
+
+export async function deleteRoom(id: string): Promise<boolean> {
+  const deletedCount = await database<RoomRecord>("rooms")
+    .where({ id })
+    .delete();
+
+  return deletedCount > 0;
+}

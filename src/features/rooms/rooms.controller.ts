@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 import { randomUUID } from "node:crypto";
 import {
+  deleteRoom,
   getRoomById,
   insertRoom,
   listRooms,
@@ -74,4 +75,17 @@ export const updateRoomController: RequestHandler<{ id: string }> = async (
   } else {
     response.status(200).json(updatedRoom);
   }
+};
+
+export const deleteRoomByIdController: RequestHandler<{ id: string }> = async (
+  request,
+  response,
+) => {
+  const deleted = await deleteRoom(request.params.id);
+  if (!deleted) {
+    response.status(404).json({ error: "Room not found." });
+    return;
+  }
+
+  response.status(200);
 };
