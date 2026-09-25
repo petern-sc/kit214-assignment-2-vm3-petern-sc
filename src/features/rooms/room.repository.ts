@@ -48,7 +48,7 @@ export async function getRoomById(id: string): Promise<Room | null> {
 export async function updateRoom(room: Room): Promise<Room | null> {
   const record = toRoomRecord(room);
   const { id } = record;
-  
+
   return database.transaction(async (trx) => {
     await trx<RoomRecord>("rooms").where({ id }).update(record);
 
@@ -60,4 +60,3 @@ export async function updateRoom(room: Room): Promise<Room | null> {
     return updatedRecord ? toRoom(updatedRecord) : null;
   });
 }
-

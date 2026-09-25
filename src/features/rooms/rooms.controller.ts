@@ -1,9 +1,22 @@
 import type { RequestHandler } from "express";
 import { randomUUID } from "node:crypto";
-import { getRoomById, insertRoom, listRooms, updateRoom } from "./room.repository.js";
-import { CreateRoomInputSchema, UpdateRoomInputSchema, type CreateRoomInput, type Room } from "./models/room.js";
+import {
+  getRoomById,
+  insertRoom,
+  listRooms,
+  updateRoom,
+} from "./room.repository.js";
+import {
+  CreateRoomInputSchema,
+  UpdateRoomInputSchema,
+  type CreateRoomInput,
+  type Room,
+} from "./models/room.js";
 
-export const listRoomsController: RequestHandler = async (_request, response) => {
+export const listRoomsController: RequestHandler = async (
+  _request,
+  response,
+) => {
   const rooms = await listRooms();
   response.status(200).json(rooms);
 };
@@ -13,7 +26,10 @@ async function createRoom(input: CreateRoomInput): Promise<Room> {
   return insertRoom(room);
 }
 
-export const createRoomController: RequestHandler = async (request, response) => {
+export const createRoomController: RequestHandler = async (
+  request,
+  response,
+) => {
   const result = CreateRoomInputSchema.safeParse(request.body);
   if (!result.success) {
     response.status(400).json({ error: result.error.issues });
@@ -59,4 +75,3 @@ export const updateRoomController: RequestHandler<{ id: string }> = async (
     response.status(200).json(updatedRoom);
   }
 };
-
