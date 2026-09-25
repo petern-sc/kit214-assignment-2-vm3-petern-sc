@@ -7,6 +7,13 @@ export const RoomSchema = z.object({
   interfaceType: z.string(),
 });
 
+export type RoomRecord = {
+  id: string;
+  name: string;
+  target_url: string;
+  interface_type: string;
+};
+
 export const CreateRoomInputSchema = RoomSchema.omit({ id: true });
 
 export type Room = z.infer<typeof RoomSchema>;
