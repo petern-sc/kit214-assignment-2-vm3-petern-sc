@@ -1,5 +1,6 @@
 import express from "express";
 import infoRoutes from "./features/info/info.routes.js";
+import { errorHandler } from "./shared/error-handler.js";
 
 const app = express();
 
@@ -10,5 +11,6 @@ app.get("/", (_request, response) => {
 });
 
 app.use(infoRoutes);
+app.use(errorHandler);
 
 export default app;
