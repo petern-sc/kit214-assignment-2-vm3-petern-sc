@@ -35,3 +35,29 @@ export async function listRooms(): Promise<Room[]> {
 
   return rows.map(toRoom);
 }
+
+export async function getRoomById(id: string): Promise<Room | null> {
+  const record = await database<RoomRecord>("rooms")
+    .select("id", "name", "target_url", "interface_type")
+    .where({ id })
+    .first();
+
+  return record ? toRoom(record) : null;
+}
+
+export async function updateRoom(room: Room): Promise<Room | null> {
+  const record = toRoomRecord(room);
+  const { id } = record;
+  
+  return database.transaction(async (trx) => {
+    await trx<RoomRecord>("rooms").where({ id }).update(record);
+
+    const updatedRecord = await trx<RoomRecord>("rooms")
+      .select("id", "name", "target_url", "interface_type")
+      .where({ id })
+      .first();
+
+    return updatedRecord ? toRoom(updatedRecord) : null;
+  });
+}
+

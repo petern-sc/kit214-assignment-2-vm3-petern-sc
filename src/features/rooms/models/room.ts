@@ -15,6 +15,7 @@ export type RoomRecord = {
 };
 
 export const CreateRoomInputSchema = RoomSchema.omit({ id: true });
+export const UpdateRoomInputSchema = RoomSchema.omit({ id: true });
 
 export type Room = z.infer<typeof RoomSchema>;
 export type CreateRoomInput = z.infer<typeof CreateRoomInputSchema>;
