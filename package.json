@@ -28,6 +28,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "express": "^5.0.1",
     "knex": "^3.3.0",
     "mysql2": "^3.24.4",
