@@ -13,6 +13,7 @@ import {
   type CreateRoomInput,
   type Room,
 } from "./models/room.js";
+import { roomNotFound } from "./helper.js";
 
 export const listRoomsController: RequestHandler = async (
   _request,
@@ -47,7 +48,7 @@ export const getRoomByIdController: RequestHandler<{ id: string }> = async (
 ) => {
   const room = await getRoomById(request.params.id);
   if (!room) {
-    response.status(404).json({ error: "Room not found." });
+    roomNotFound(response);
     return;
   }
 
@@ -71,7 +72,7 @@ export const updateRoomController: RequestHandler<{ id: string }> = async (
   });
 
   if (!updatedRoom) {
-    response.status(404).json({ error: "Room not found." });
+    roomNotFound(response);
   } else {
     response.status(200).json(updatedRoom);
   }
@@ -83,7 +84,7 @@ export const deleteRoomByIdController: RequestHandler<{ id: string }> = async (
 ) => {
   const deleted = await deleteRoom(request.params.id);
   if (!deleted) {
-    response.status(404).json({ error: "Room not found." });
+    roomNotFound(response);
     return;
   }
 
