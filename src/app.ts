@@ -1,20 +1,23 @@
 import express from "express";
-import authRoutes from "./features/auth/auth.routes.js";
+import type { AppConfig } from "./config.js";
+import { createAuthRoutes } from "./features/auth/auth.routes.js";
 import infoRoutes from "./features/info/info.routes.js";
 import roomsRoutes from "./features/rooms/rooms.routes.js";
 import { errorHandler } from "./shared/error-handler.js";
 
-const app = express();
+export function createApp(config: AppConfig) {
+  const app = express();
 
-app.use(express.json());
-app.use(authRoutes);
+  app.use(express.json());
+  app.use(createAuthRoutes(config));
 
-app.get("/", (_request, response) => {
-  response.json({ message: "Hello, world!" });
-});
+  app.get("/", (_request, response) => {
+    response.json({ message: "Hello, world!" });
+  });
 
-app.use(infoRoutes);
-app.use(roomsRoutes);
-app.use(errorHandler);
+  app.use(infoRoutes);
+  app.use(roomsRoutes);
+  app.use(errorHandler);
 
-export default app;
+  return app;
+}

@@ -1,8 +1,15 @@
 import { Router } from "express";
-import { registerController } from "./auth.controller.js";
+import type { AppConfig } from "../../config.js";
+import {
+  createLoginController,
+  registerController,
+} from "./auth.controller.js";
 
-const authRouter = Router();
+export function createAuthRoutes(config: AppConfig) {
+  const authRouter = Router();
 
-authRouter.post("/register", registerController);
+  authRouter.post("/register", registerController);
+  authRouter.post("/login", createLoginController(config));
 
-export default authRouter;
+  return authRouter;
+}

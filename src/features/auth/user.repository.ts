@@ -25,3 +25,14 @@ export async function insertUser(user: UserRecord): Promise<void> {
       }
     });
 }
+
+export async function getUserByUsername(
+  username: string,
+): Promise<UserRecord | null> {
+  const user = await database<UserRecord>("users")
+    .select("id", "username", "password_hash")
+    .where({ username })
+    .first();
+
+  return user ?? null;
+}
