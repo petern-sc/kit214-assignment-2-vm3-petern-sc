@@ -1,6 +1,7 @@
 import express from "express";
 import type { AppConfig } from "./config.js";
 import { createAuthRoutes } from "./features/auth/auth.routes.js";
+import { createBookingsRoutes } from "./features/bookings/bookings.routes.js";
 import infoRoutes from "./features/info/info.routes.js";
 import roomsRoutes from "./features/rooms/rooms.routes.js";
 import { errorHandler } from "./shared/error-handler.js";
@@ -10,6 +11,7 @@ export function createApp(config: AppConfig) {
 
   app.use(express.json());
   app.use(createAuthRoutes(config));
+  app.use(createBookingsRoutes(config));
 
   app.get("/", (_request, response) => {
     response.json({ message: "Hello, world!" });
