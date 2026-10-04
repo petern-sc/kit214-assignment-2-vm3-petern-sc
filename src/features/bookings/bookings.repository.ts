@@ -19,6 +19,15 @@ export async function listBookings(): Promise<Booking[]> {
   return records.map(toBooking);
 }
 
+export async function getBookingById(id: string): Promise<Booking | null> {
+  const record = await database<BookingRecord>("bookings")
+    .select("id", "name", "room_id", "start_time", "end_time", "user_id")
+    .where({ id })
+    .first();
+
+  return record ? toBooking(record) : null;
+}
+
 export type CreateBookingResult =
   | { kind: "room-not-found" }
   | { kind: "overlap-conflict" }

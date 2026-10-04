@@ -6,6 +6,7 @@ import {
 } from "./models/booking.js";
 import {
   createBooking,
+  getBookingById,
   listBookings,
 } from "./bookings.repository.js";
 
@@ -15,6 +16,19 @@ export const listBookingsController: RequestHandler = async (
 ) => {
   const bookings = await listBookings();
   response.status(200).json(bookings);
+};
+
+export const getBookingByIdController: RequestHandler<{ id: string }> = async (
+  request,
+  response,
+) => {
+  const booking = await getBookingById(request.params.id);
+  if (!booking) {
+    response.status(404).json({ error: "Booking not found" });
+    return;
+  }
+
+  response.status(200).json(booking);
 };
 
 export const createBookingController: RequestHandler = async (
