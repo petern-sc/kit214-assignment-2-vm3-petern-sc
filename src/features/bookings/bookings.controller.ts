@@ -8,6 +8,7 @@ import {
 } from "./models/booking.js";
 import {
   createBooking,
+  deleteBooking,
   getBookingById,
   listBookings,
   updateBooking,
@@ -32,6 +33,19 @@ export const getBookingByIdController: RequestHandler<{ id: string }> = async (
   }
 
   response.status(200).json(booking);
+};
+
+export const deleteBookingByIdController: RequestHandler<{ id: string }> = async (
+  request,
+  response,
+) => {
+  const deleted = await deleteBooking(request.params.id);
+  if (!deleted) {
+    response.status(404).json({ error: "Booking not found" });
+    return;
+  }
+
+  response.status(204).end();
 };
 
 export const createBookingController: RequestHandler = async (

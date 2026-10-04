@@ -28,6 +28,14 @@ export async function getBookingById(id: string): Promise<Booking | null> {
   return record ? toBooking(record) : null;
 }
 
+export async function deleteBooking(id: string): Promise<boolean> {
+  const deletedCount = await database<BookingRecord>("bookings")
+    .where({ id })
+    .delete();
+
+  return deletedCount > 0;
+}
+
 export type UpdateBookingResult =
   | { kind: "booking-not-found" }
   | { kind: "overlap-conflict" }
