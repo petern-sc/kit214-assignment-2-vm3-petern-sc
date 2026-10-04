@@ -142,3 +142,16 @@ export async function hasBookingOverlap(
 
   return overlappingBooking !== undefined;
 }
+
+export async function getActiveBookingsForRoom(
+  roomId: string,
+  currentTime: Date,
+): Promise<Booking[]> {
+  const records = await database<BookingRecord>("bookings")
+    .select("id", "name", "room_id", "start_time", "end_time", "user_id")
+    .where({ room_id: roomId })
+    .andWhere("start_time", "<=", currentTime)
+    .andWhere("end_time", ">=", currentTime);
+
+  return records.map(toBooking);
+}

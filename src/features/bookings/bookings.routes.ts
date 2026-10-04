@@ -5,6 +5,7 @@ import {
   createBookingController,
   deleteBookingByIdController,
   getBookingByIdController,
+  getBookingStatusController,
   listBookingsController,
   updateBookingByIdController,
 } from "./bookings.controller.js";
@@ -30,6 +31,7 @@ export function createBookingsRoutes(config: AppConfig) {
     requireAuthMiddleware,
     deleteBookingByIdController,
   );
+  bookingsRouter.query("/bookings/status", getBookingStatusController);
 
   return bookingsRouter;
 }

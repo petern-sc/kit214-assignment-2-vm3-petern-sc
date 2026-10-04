@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import { randomUUID } from "node:crypto";
 import {
   CreateBookingInputSchema,
+  GetBookingStatusInputSchema,
   UpdateBookingInputSchema,
   UpdateBookingRequest,
   type Booking,
@@ -9,6 +10,7 @@ import {
 import {
   createBooking,
   deleteBooking,
+  getActiveBookingsForRoom,
   getBookingById,
   listBookings,
   updateBooking,
@@ -35,10 +37,9 @@ export const getBookingByIdController: RequestHandler<{ id: string }> = async (
   response.status(200).json(booking);
 };
 
-export const deleteBookingByIdController: RequestHandler<{ id: string }> = async (
-  request,
-  response,
-) => {
+export const deleteBookingByIdController: RequestHandler<{
+  id: string;
+}> = async (request, response) => {
   const deleted = await deleteBooking(request.params.id);
   if (!deleted) {
     response.status(404).json({ error: "Booking not found" });
@@ -86,10 +87,9 @@ export const createBookingController: RequestHandler = async (
   }
 };
 
-export const updateBookingByIdController: RequestHandler<{ id: string }> = async (
-  request,
-  response,
-) => {
+export const updateBookingByIdController: RequestHandler<{
+  id: string;
+}> = async (request, response) => {
   const result = UpdateBookingInputSchema.safeParse(request.body);
   if (!result.success) {
     response.status(400).json({ error: "Invalid booking input" });
@@ -118,5 +118,37 @@ export const updateBookingByIdController: RequestHandler<{ id: string }> = async
       const unhandledResult: never = createResult;
       return unhandledResult;
     }
+  }
+};
+
+export const getBookingStatusController: RequestHandler = async (
+  request,
+  response,
+) => {
+  const result = GetBookingStatusInputSchema.safeParse(request.body);
+  if (!result.success) {
+    response.status(400).json({ error: "Invalid booking status input" });
+    return;
+  }
+
+  const now = new Date();
+
+  const activeBookings = await getActiveBookingsForRoom(
+    result.data.roomId,
+    now,
+  );
+
+  switch (activeBookings.length) {
+    case 0:
+      response.status(200).json({ bookingId: null });
+      return;
+    case 1:
+      response.status(200).json({ bookingId: activeBookings[0].id });
+      return;
+    default:
+      response
+        .status(500)
+        .json({ error: "Multiple active bookings found for the room" });
+      return;
   }
 };

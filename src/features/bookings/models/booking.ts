@@ -44,3 +44,10 @@ export type UpdateBookingRequest = {
   startTime: string;
   endTime: string;
 };
+
+export const GetBookingStatusInputSchema = z
+  .object({
+    roomId: z.uuid(),
+  });
+
+export type GetBookingStatusInput = z.infer<typeof GetBookingStatusInputSchema>;

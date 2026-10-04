@@ -10,6 +10,7 @@ export function createApp(config: AppConfig) {
   const app = express();
 
   app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
   app.use(createAuthRoutes(config));
   app.use(createBookingsRoutes(config));
 
