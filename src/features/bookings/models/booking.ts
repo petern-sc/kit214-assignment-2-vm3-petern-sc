@@ -28,3 +28,19 @@ export const CreateBookingInputSchema = z
   });
 
 export type CreateBookingInput = z.infer<typeof CreateBookingInputSchema>;
+
+export const UpdateBookingInputSchema = z
+  .object({
+    name: z.string().min(3),
+    startTime: z.iso.datetime(),
+    endTime: z.iso.datetime(),
+  });
+
+export type UpdateBookingInput = z.infer<typeof UpdateBookingInputSchema>;
+
+export type UpdateBookingRequest = {
+  id: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+};

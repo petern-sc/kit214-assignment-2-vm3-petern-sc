@@ -5,21 +5,25 @@ import {
   createBookingController,
   getBookingByIdController,
   listBookingsController,
+  updateBookingByIdController,
 } from "./bookings.controller.js";
 
 export function createBookingsRoutes(config: AppConfig) {
+  const requireAuthMiddleware = createRequireAuth(config);
+
   const bookingsRouter = Router();
   bookingsRouter.post(
     "/bookings",
-    createRequireAuth(config),
+    requireAuthMiddleware,
     createBookingController,
   );
   bookingsRouter.get(
     "/bookings",
-    createRequireAuth(config),
+    requireAuthMiddleware,
     listBookingsController,
   );
   bookingsRouter.get("/bookings/:id", getBookingByIdController);
+  bookingsRouter.put("/bookings/:id", requireAuthMiddleware, updateBookingByIdController);
 
   return bookingsRouter;
 }

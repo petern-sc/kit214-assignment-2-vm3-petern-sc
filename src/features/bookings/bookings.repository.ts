@@ -2,7 +2,7 @@ import { database } from "../../shared/database.js";
 import type { Knex } from "knex";
 import type { RoomRecord } from "../rooms/models/room.js";
 import { toBooking, toBookingRecord } from "./booking-mapper.js";
-import type { Booking, BookingRecord } from "./models/booking.js";
+import type { Booking, BookingRecord, UpdateBookingRequest } from "./models/booking.js";
 
 export async function listBookings(): Promise<Booking[]> {
   const records = await database<BookingRecord>("bookings").select(
@@ -26,6 +26,55 @@ export async function getBookingById(id: string): Promise<Booking | null> {
     .first();
 
   return record ? toBooking(record) : null;
+}
+
+export type UpdateBookingResult =
+  | { kind: "booking-not-found" }
+  | { kind: "overlap-conflict" }
+  | { kind: "updated"; booking: Booking };  
+
+export async function updateBooking(
+  booking: UpdateBookingRequest,
+): Promise<UpdateBookingResult> {
+  return database.transaction(async (trx): Promise<UpdateBookingResult> => {
+    const existingBooking = await trx<BookingRecord>("bookings")
+      .select("id", "room_id", "start_time", "end_time", "user_id")
+      .where({ id: booking.id })
+      .first();
+
+    if (!existingBooking) {
+      return { kind: "booking-not-found" };
+    }
+
+    const isOverlap = await hasBookingOverlap(
+      trx,
+      existingBooking.room_id,
+      new Date(booking.startTime),
+      new Date(booking.endTime),
+    );
+
+    if (isOverlap) {
+      return { kind: "overlap-conflict" };
+    }
+
+    await trx<BookingRecord>("bookings")
+      .where({ id: booking.id })
+      .update({
+        name: booking.name,
+        start_time: new Date(booking.startTime),
+        end_time: new Date(booking.endTime),
+      });
+
+    const updatedBooking = await trx<BookingRecord>("bookings")
+      .select("id", "name", "room_id", "start_time", "end_time", "user_id")
+      .where({ id: booking.id })
+      .first();
+    if (updatedBooking) {
+      return { kind: "updated", booking: toBooking(updatedBooking) };
+    } else {
+      throw new Error("Booking not found after update. This should not happen");
+    }
+  });
 }
 
 export type CreateBookingResult =
