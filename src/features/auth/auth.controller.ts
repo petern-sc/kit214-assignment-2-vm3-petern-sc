@@ -3,9 +3,47 @@ import type { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import { randomUUID } from "node:crypto";
 import type { AppConfig } from "../../config.js";
-import { LoginRequestSchema, RegisterInputSchema } from "./models/user.js";
-import { getUserByUsername, insertUser } from "./user.repository.js";
+import {
+  LoginRequestSchema,
+  RegisterInputSchema,
+  type UserRecord,
+} from "./models/user.js";
+import {
+  getUserById,
+  getUserByUsername,
+  insertUser,
+  listUsers,
+} from "./user.repository.js";
 import { UsernameAlreadyExistsError } from "./models/auth-errors.js";
+
+export const listUsersController: RequestHandler = async (
+  _request,
+  response,
+) => {
+  const users = await listUsers();
+  response.status(200).json(users.map(toUserResponse));
+};
+
+export const getUserByIdController: RequestHandler<{ id: string }> = async (
+  request,
+  response,
+) => {
+  const user = await getUserById(request.params.id);
+  if (!user) {
+    response.status(404).json({ error: "User not found" });
+    return;
+  }
+
+  response.status(200).json(toUserResponse(user));
+};
+
+function toUserResponse(user: UserRecord) {
+  return {
+    id: user.id,
+    username: user.username,
+    passwordHash: user.password_hash,
+  };
+}
 
 export const registerController: RequestHandler = async (request, response) => {
   const result = RegisterInputSchema.safeParse(request.body);

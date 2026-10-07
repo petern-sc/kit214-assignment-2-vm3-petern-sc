@@ -36,3 +36,20 @@ export async function getUserByUsername(
 
   return user ?? null;
 }
+
+export async function listUsers(): Promise<UserRecord[]> {
+  return database<UserRecord>("users").select(
+    "id",
+    "username",
+    "password_hash",
+  );
+}
+
+export async function getUserById(id: string): Promise<UserRecord | null> {
+  const user = await database<UserRecord>("users")
+    .select("id", "username", "password_hash")
+    .where({ id })
+    .first();
+
+  return user ?? null;
+}
