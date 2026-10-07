@@ -1,5 +1,6 @@
 import { database } from "../../shared/database.js";
-import type { BookingRecord } from "../bookings/models/booking.js";
+import { includeInvitedUserIds } from "../bookings/bookings.repository.js";
+import type { Booking, BookingRecord } from "../bookings/models/booking.js";
 
 type BookingInviteRecord = {
   booking_id: string;
@@ -41,4 +42,22 @@ export async function createInvite(
 
     return { kind: "invited" };
   });
+}
+
+
+export async function listBookingsForUser(userId: string): Promise<Booking[]> {
+  const records = await database<BookingRecord>("bookings")
+    .select("id", "name", "room_id", "start_time", "end_time", "user_id")
+    .where((query) =>
+      query
+        .where({ user_id: userId })
+        .orWhereIn(
+          "id",
+          database<BookingInviteRecord>("booking_invites")
+            .select("booking_id")
+            .where({ user_id: userId }),
+        ),
+    );
+
+  return includeInvitedUserIds(records);
 }

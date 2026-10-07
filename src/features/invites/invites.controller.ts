@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 import { CreateInviteInputSchema } from "./models/invite.js";
-import { createInvite } from "./invites.repository.js";
+import { createInvite, listBookingsForUser } from "./invites.repository.js";
 
 export const createInviteController: RequestHandler = async (
   request,
@@ -31,4 +31,13 @@ export const createInviteController: RequestHandler = async (
       return unhandledResult;
     }
   }
+};
+
+export const listInvitesController: RequestHandler = async (
+  _request,
+  response,
+) => {
+  const userId = response.locals.userId as string;
+  const bookings = await listBookingsForUser(userId);
+  response.status(200).json(bookings);
 };

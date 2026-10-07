@@ -173,7 +173,7 @@ export async function getActiveBookingIdForRoom(
   return records[0]?.id ?? null;
 }
 
-async function includeInvitedUserIds(
+export async function includeInvitedUserIds(
   records: BookingRecord[],
   connection: Knex | Knex.Transaction = database,
 ): Promise<Booking[]> {
