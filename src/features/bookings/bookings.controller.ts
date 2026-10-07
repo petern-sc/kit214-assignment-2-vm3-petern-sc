@@ -10,7 +10,7 @@ import {
 import {
   createBooking,
   deleteBooking,
-  getActiveBookingsForRoom,
+  getActiveBookingIdForRoom,
   getBookingById,
   listBookings,
   updateBooking,
@@ -133,22 +133,10 @@ export const getBookingStatusController: RequestHandler = async (
 
   const now = new Date();
 
-  const activeBookings = await getActiveBookingsForRoom(
+  const activeBookingId = await getActiveBookingIdForRoom(
     result.data.roomId,
     now,
   );
 
-  switch (activeBookings.length) {
-    case 0:
-      response.status(200).json({ bookingId: null });
-      return;
-    case 1:
-      response.status(200).json({ bookingId: activeBookings[0].id });
-      return;
-    default:
-      response
-        .status(500)
-        .json({ error: "Multiple active bookings found for the room" });
-      return;
-  }
+  response.status(200).json({ bookingId: activeBookingId });
 };

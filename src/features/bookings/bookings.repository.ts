@@ -156,17 +156,21 @@ export async function hasBookingOverlap(
   return overlappingBooking !== undefined;
 }
 
-export async function getActiveBookingsForRoom(
+export async function getActiveBookingIdForRoom(
   roomId: string,
   currentTime: Date,
-): Promise<Booking[]> {
-  const records = await database<BookingRecord>("bookings")
-    .select("id", "name", "room_id", "start_time", "end_time", "user_id")
-    .where({ room_id: roomId })
+): Promise<string | null> {
+  const records = await database<{ id: string }>("bookings")
+    .select("id")
+    .where("room_id", roomId)
     .andWhere("start_time", "<=", currentTime)
-    .andWhere("end_time", ">=", currentTime);
+    .andWhere("end_time", ">", currentTime);
 
-  return includeInvitedUserIds(records);
+  if (records.length > 1) {
+    throw new Error("Multiple active bookings found for the room");
+  }
+
+  return records[0]?.id ?? null;
 }
 
 async function includeInvitedUserIds(
