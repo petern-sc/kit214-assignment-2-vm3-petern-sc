@@ -25,12 +25,20 @@ export function createBookingsRoutes(config: AppConfig) {
     listBookingsController,
   );
   bookingsRouter.get("/bookings/:id", getBookingByIdController);
-  bookingsRouter.put("/bookings/:id", requireAuthMiddleware, updateBookingByIdController);
+  bookingsRouter.put(
+    "/bookings/:id",
+    requireAuthMiddleware,
+    updateBookingByIdController,
+  );
   bookingsRouter.delete(
     "/bookings/:id",
     requireAuthMiddleware,
     deleteBookingByIdController,
   );
+
+  if (!bookingsRouter.query) {
+    throw new Error("query method is not available on this expressjs version");
+  }
   bookingsRouter.query("/bookings/status", getBookingStatusController);
 
   return bookingsRouter;

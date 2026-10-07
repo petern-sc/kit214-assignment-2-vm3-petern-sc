@@ -2,7 +2,16 @@ import { database } from "../../shared/database.js";
 import type { Knex } from "knex";
 import type { RoomRecord } from "../rooms/models/room.js";
 import { toBooking, toBookingRecord } from "./booking-mapper.js";
-import type { Booking, BookingRecord, UpdateBookingRequest } from "./models/booking.js";
+import type {
+  Booking,
+  BookingRecord,
+  UpdateBookingRequest,
+} from "./models/booking.js";
+
+type BookingInviteRecord = {
+  booking_id: string;
+  user_id: string;
+};
 
 export async function listBookings(): Promise<Booking[]> {
   const records = await database<BookingRecord>("bookings").select(
@@ -14,9 +23,7 @@ export async function listBookings(): Promise<Booking[]> {
     "user_id",
   );
 
-  if (records.length === 0) return [];
-
-  return records.map(toBooking);
+  return includeInvitedUserIds(records);
 }
 
 export async function getBookingById(id: string): Promise<Booking | null> {
@@ -25,7 +32,9 @@ export async function getBookingById(id: string): Promise<Booking | null> {
     .where({ id })
     .first();
 
-  return record ? toBooking(record) : null;
+  if (!record) return null;
+
+  return (await includeInvitedUserIds([record]))[0] ?? null;
 }
 
 export async function deleteBooking(id: string): Promise<boolean> {
@@ -39,7 +48,7 @@ export async function deleteBooking(id: string): Promise<boolean> {
 export type UpdateBookingResult =
   | { kind: "booking-not-found" }
   | { kind: "overlap-conflict" }
-  | { kind: "updated"; booking: Booking };  
+  | { kind: "updated"; booking: Booking };
 
 export async function updateBooking(
   booking: UpdateBookingRequest,
@@ -78,7 +87,11 @@ export async function updateBooking(
       .where({ id: booking.id })
       .first();
     if (updatedBooking) {
-      return { kind: "updated", booking: toBooking(updatedBooking) };
+      const [bookingWithInvitees] = await includeInvitedUserIds(
+        [updatedBooking],
+        trx,
+      );
+      return { kind: "updated", booking: bookingWithInvitees };
     } else {
       throw new Error("Booking not found after update. This should not happen");
     }
@@ -153,5 +166,32 @@ export async function getActiveBookingsForRoom(
     .andWhere("start_time", "<=", currentTime)
     .andWhere("end_time", ">=", currentTime);
 
-  return records.map(toBooking);
+  return includeInvitedUserIds(records);
+}
+
+async function includeInvitedUserIds(
+  records: BookingRecord[],
+  connection: Knex | Knex.Transaction = database,
+): Promise<Booking[]> {
+  if (records.length === 0) return [];
+
+  const invitations = await connection<BookingInviteRecord>("booking_invites")
+    .select("booking_id", "user_id")
+    .whereIn(
+      "booking_id",
+      records.map((record) => record.id),
+    );
+
+  const invitedUserIds = new Map(
+    records.map((record) => [record.id, new Set([record.user_id])]),
+  );
+
+  for (const invitation of invitations) {
+    invitedUserIds.get(invitation.booking_id)?.add(invitation.user_id);
+  }
+
+  return records.map((record) => ({
+    ...toBooking(record),
+    invitedUserIds: [...(invitedUserIds.get(record.id) ?? [])],
+  }));
 }

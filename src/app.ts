@@ -2,6 +2,7 @@ import express from "express";
 import type { AppConfig } from "./config.js";
 import { createAuthRoutes } from "./features/auth/auth.routes.js";
 import { createBookingsRoutes } from "./features/bookings/bookings.routes.js";
+import { createInvitesRoutes } from "./features/invites/invites.routes.js";
 import infoRoutes from "./features/info/info.routes.js";
 import roomsRoutes from "./features/rooms/rooms.routes.js";
 import { errorHandler } from "./shared/error-handler.js";
@@ -13,6 +14,7 @@ export function createApp(config: AppConfig) {
   app.use(express.urlencoded({ extended: false }));
   app.use(createAuthRoutes(config));
   app.use(createBookingsRoutes(config));
+  app.use(createInvitesRoutes(config));
 
   app.get("/", (_request, response) => {
     response.json({ message: "Hello, world!" });
