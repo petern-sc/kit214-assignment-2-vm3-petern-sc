@@ -4,7 +4,7 @@ import { createAuthRoutes } from "./features/auth/auth.routes.js";
 import { createBookingsRoutes } from "./features/bookings/bookings.routes.js";
 import { createInvitesRoutes } from "./features/invites/invites.routes.js";
 import infoRoutes from "./features/info/info.routes.js";
-import roomsRoutes from "./features/rooms/rooms.routes.js";
+import { createRoomsRoutes } from "./features/rooms/rooms.routes.js";
 import { errorHandler } from "./shared/error-handler.js";
 
 export function createApp(config: AppConfig) {
@@ -21,7 +21,7 @@ export function createApp(config: AppConfig) {
   });
 
   app.use(infoRoutes);
-  app.use(roomsRoutes);
+  app.use(createRoomsRoutes(config));
   app.use(errorHandler);
 
   return app;

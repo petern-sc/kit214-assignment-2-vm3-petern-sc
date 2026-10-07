@@ -1,4 +1,6 @@
 import { Router } from "express";
+import type { AppConfig } from "../../config.js";
+import { createRequireAuth } from "../../shared/require-auth.js";
 import {
   createRoomController,
   deleteRoomByIdController,
@@ -7,12 +9,19 @@ import {
   updateRoomController,
 } from "./rooms.controller.js";
 
-const roomsRouter = Router();
+export function createRoomsRoutes(config: AppConfig) {
+  const roomsRouter = Router();
+  const requireAuthMiddleware = createRequireAuth(config);
 
-roomsRouter.post("/rooms", createRoomController);
-roomsRouter.get("/rooms", listRoomsController);
-roomsRouter.get("/rooms/:id", getRoomByIdController);
-roomsRouter.put("/rooms/:id", updateRoomController);
-roomsRouter.delete("/rooms/:id", deleteRoomByIdController);
+  roomsRouter.post("/rooms", createRoomController);
+  roomsRouter.get("/rooms", listRoomsController);
+  roomsRouter.get("/rooms/:id", getRoomByIdController);
+  roomsRouter.put("/rooms/:id", updateRoomController);
+  roomsRouter.delete(
+    "/rooms/:id",
+    requireAuthMiddleware,
+    deleteRoomByIdController,
+  );
 
-export default roomsRouter;
+  return roomsRouter;
+}
