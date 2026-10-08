@@ -1,6 +1,10 @@
 export type AppConfig = {
   jwtSecret: string;
   port: number;
+  tls?: {
+    certPath: string;
+    keyPath: string;
+  };
 };
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
@@ -14,5 +18,17 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error("PORT must be an integer between 1 and 65535");
   }
 
-  return { jwtSecret, port };
+  if (env.APP_ENV === "development") {
+    return { jwtSecret, port };
+  }
+
+  const certPath = env.TLS_CERT_PATH;
+  const keyPath = env.TLS_KEY_PATH;
+  if (!certPath || !keyPath) {
+    throw new Error(
+      "TLS_CERT_PATH and TLS_KEY_PATH must be set unless APP_ENV=development",
+    );
+  }
+
+  return { jwtSecret, port, tls: { certPath, keyPath } };
 }
