@@ -2,13 +2,12 @@ import type { RequestHandler } from "express";
 import { HttpClient } from "../../shared/http-client.js";
 
 interface Quote {
-  content: string;
+  quote: string;
 }
 
-const quotableClient = new HttpClient("https://api.quotable.io");
+const quotableClient = new HttpClient("https://dummyjson.com");
 
 export const getRandomQuote: RequestHandler = async (_request, response) => {
-  const quotes = await quotableClient.get<Quote[]>("/quotes/random");
-  const quote = quotes[0].content;
+  const { quote } = await quotableClient.get<Quote>("/quotes/1");
   response.status(418).json({ quote });
 };
