@@ -13,3 +13,9 @@
 ### HTTPS configuration
 
 - Configured via express. When `APP_ENV=development` skips TLS setup for local dev. Setting APP_ENV to anything else will run express with https.
+
+### Running
+
+- `npm run dev` runs the TypeScript source directly and restarts the server when source files change; no build is needed.
+- `npm run build` compiles the source into `dist/`.
+- `npm start` runs the compiled `dist/server.js`, so rebuild after changing source before using it.
