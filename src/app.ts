@@ -5,11 +5,13 @@ import { createBookingsRoutes } from "./features/bookings/bookings.routes.js";
 import { createInvitesRoutes } from "./features/invites/invites.routes.js";
 import infoRoutes from "./features/info/info.routes.js";
 import { createRoomsRoutes } from "./features/rooms/rooms.routes.js";
+import { corsMiddleware } from "./shared/cors.js";
 import { errorHandler } from "./shared/error-handler.js";
 
 export function createApp(config: AppConfig) {
   const app = express();
 
+  app.use(corsMiddleware);
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(createAuthRoutes(config));
