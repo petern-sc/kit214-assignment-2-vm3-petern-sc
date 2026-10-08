@@ -59,6 +59,12 @@ export const updateRoomController: RequestHandler<{ id: string }> = async (
   request,
   response,
 ) => {
+  const existingRoom = await getRoomById(request.params.id);
+  if (!existingRoom) {
+    roomNotFound(response);
+    return;
+  }
+
   const roomRequest = UpdateRoomInputSchema.safeParse(request.body);
 
   if (!roomRequest.success) {

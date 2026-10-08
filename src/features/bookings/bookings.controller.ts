@@ -90,6 +90,12 @@ export const createBookingController: RequestHandler = async (
 export const updateBookingByIdController: RequestHandler<{
   id: string;
 }> = async (request, response) => {
+  const existingBooking = await getBookingById(request.params.id);
+  if (!existingBooking) {
+    response.status(404).json({ error: "Booking not found" });
+    return;
+  }
+
   const result = UpdateBookingInputSchema.safeParse(request.body);
   if (!result.success) {
     response.status(400).json({ error: "Invalid booking input" });
