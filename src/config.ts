@@ -1,6 +1,7 @@
 export type AppConfig = {
   jwtSecret: string;
   port: number;
+  publicBaseUrl: string;
   tls?: {
     certPath: string;
     keyPath: string;
@@ -18,8 +19,18 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error("PORT must be an integer between 1 and 65535");
   }
 
+  const publicBaseUrl = env.PUBLIC_BASE_URL;
+  if (!publicBaseUrl) {
+    throw new Error("PUBLIC_BASE_URL must be set");
+  }
+  const config: AppConfig = {
+    jwtSecret,
+    port,
+    publicBaseUrl,
+  };
+
   if (env.APP_ENV === "development") {
-    return { jwtSecret, port };
+    return config;
   }
 
   const certPath = env.TLS_CERT_PATH;
@@ -30,5 +41,5 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     );
   }
 
-  return { jwtSecret, port, tls: { certPath, keyPath } };
+  return { ...config, tls: { certPath, keyPath } };
 }

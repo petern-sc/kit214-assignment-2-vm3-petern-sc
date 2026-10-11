@@ -8,6 +8,7 @@ import {
   listRoomsController,
   updateRoomController,
 } from "./rooms.controller.js";
+import { createScrapeRoomsController } from "./scrape.controller.js";
 
 export function createRoomsRoutes(config: AppConfig) {
   const roomsRouter = Router();
@@ -15,6 +16,11 @@ export function createRoomsRoutes(config: AppConfig) {
 
   roomsRouter.post("/rooms", createRoomController);
   roomsRouter.get("/rooms", listRoomsController);
+  roomsRouter.get(
+    "/scrape",
+    requireAuthMiddleware,
+    createScrapeRoomsController(config.publicBaseUrl),
+  );
   roomsRouter.get("/rooms/:id", getRoomByIdController);
   roomsRouter.put("/rooms/:id", updateRoomController);
   roomsRouter.delete(
