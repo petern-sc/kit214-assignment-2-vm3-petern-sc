@@ -1,5 +1,4 @@
 import { database } from "../../shared/database.js";
-import { UsernameAlreadyExistsError } from "./models/auth-errors.js";
 import type { UserRecord } from "./models/user.js";
 
 // Fails on unique constraint on username.
@@ -14,16 +13,20 @@ function isDuplicateKeyError(error: unknown): boolean {
   }
 }
 
-export async function insertUser(user: UserRecord): Promise<void> {
-  await database<UserRecord>("users")
-    .insert(user)
-    .catch((error) => {
-      if (isDuplicateKeyError(error)) {
-        throw new UsernameAlreadyExistsError();
-      } else {
-        throw error;
-      }
-    });
+export type InsertUserResult =
+  { kind: "inserted" } | { kind: "username-already-exists" };
+
+export async function insertUser(user: UserRecord): Promise<InsertUserResult> {
+  try {
+    await database<UserRecord>("users").insert(user);
+    return { kind: "inserted" };
+  } catch (error) {
+    if (isDuplicateKeyError(error)) {
+      return { kind: "username-already-exists" };
+    }
+
+    throw error;
+  }
 }
 
 export async function getUserByUsername(

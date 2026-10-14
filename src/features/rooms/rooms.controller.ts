@@ -13,7 +13,10 @@ import {
   type CreateRoomInput,
   type Room,
 } from "./models/room.js";
-import { roomNotFound } from "./helper.js";
+import {
+  sendErrorResponse,
+  sendValidationError,
+} from "../../shared/error-response.js";
 
 export const listRoomsController: RequestHandler = async (
   _request,
@@ -34,7 +37,7 @@ export const createRoomController: RequestHandler = async (
 ) => {
   const result = CreateRoomInputSchema.safeParse(request.body);
   if (!result.success) {
-    response.status(400).json({ error: result.error.issues });
+    sendValidationError(response, "Invalid room input", result.error);
     return;
   }
 
@@ -48,7 +51,7 @@ export const getRoomByIdController: RequestHandler<{ id: string }> = async (
 ) => {
   const room = await getRoomById(request.params.id);
   if (!room) {
-    roomNotFound(response);
+    sendErrorResponse(response, 404, "Room not found");
     return;
   }
 
@@ -61,14 +64,14 @@ export const updateRoomController: RequestHandler<{ id: string }> = async (
 ) => {
   const existingRoom = await getRoomById(request.params.id);
   if (!existingRoom) {
-    roomNotFound(response);
+    sendErrorResponse(response, 404, "Room not found");
     return;
   }
 
   const roomRequest = UpdateRoomInputSchema.safeParse(request.body);
 
   if (!roomRequest.success) {
-    response.status(400).json({ error: roomRequest.error.issues });
+    sendValidationError(response, "Invalid room input", roomRequest.error);
     return;
   }
 
@@ -78,7 +81,7 @@ export const updateRoomController: RequestHandler<{ id: string }> = async (
   });
 
   if (!updatedRoom) {
-    roomNotFound(response);
+    sendErrorResponse(response, 404, "Room not found");
   } else {
     response.status(200).json(updatedRoom);
   }
@@ -90,7 +93,7 @@ export const deleteRoomByIdController: RequestHandler<{ id: string }> = async (
 ) => {
   const deleted = await deleteRoom(request.params.id);
   if (!deleted) {
-    roomNotFound(response);
+    sendErrorResponse(response, 404, "Room not found");
     return;
   }
 

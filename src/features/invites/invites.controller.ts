@@ -1,4 +1,8 @@
 import type { RequestHandler } from "express";
+import {
+  sendErrorResponse,
+  sendValidationError,
+} from "../../shared/error-response.js";
 import { CreateInviteInputSchema } from "./models/invite.js";
 import { createInvite, listBookingsForUser } from "./invites.repository.js";
 
@@ -8,7 +12,7 @@ export const createInviteController: RequestHandler = async (
 ) => {
   const input = CreateInviteInputSchema.safeParse(request.body);
   if (!input.success) {
-    response.status(400).json({ error: "Invalid invite input" });
+    sendValidationError(response, "Invalid invite input", input.error);
     return;
   }
 
@@ -21,7 +25,7 @@ export const createInviteController: RequestHandler = async (
 
   switch (result.kind) {
     case "not-found":
-      response.status(404).json({ error: "Booking or user not found" });
+      sendErrorResponse(response, 404, "Booking or user not found");
       return;
     case "invited":
       response.status(200).json({ message: "User invited successfully" });

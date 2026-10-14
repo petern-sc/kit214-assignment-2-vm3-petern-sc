@@ -14,7 +14,10 @@ import {
   insertUser,
   listUsers,
 } from "./user.repository.js";
-import { UsernameAlreadyExistsError } from "./models/auth-errors.js";
+import {
+  sendErrorResponse,
+  sendValidationError,
+} from "../../shared/error-response.js";
 
 export const listUsersController: RequestHandler = async (
   _request,
@@ -30,7 +33,7 @@ export const getUserByIdController: RequestHandler<{ id: string }> = async (
 ) => {
   const user = await getUserById(request.params.id);
   if (!user) {
-    response.status(404).json({ error: "User not found" });
+    sendErrorResponse(response, 404, "User not found");
     return;
   }
 
@@ -48,25 +51,24 @@ function toUserResponse(user: UserRecord) {
 export const registerController: RequestHandler = async (request, response) => {
   const result = RegisterInputSchema.safeParse(request.body);
   if (!result.success) {
-    response.status(400).json({ error: "Username and password are required" });
+    sendValidationError(
+      response,
+      "Username and password are required",
+      result.error,
+    );
     return;
   }
 
   const { username, password } = result.data;
 
-  try {
-    await insertUser({
-      id: randomUUID(),
-      username,
-      password_hash: await bcrypt.hash(password, 10),
-    });
-  } catch (error) {
-    if (error instanceof UsernameAlreadyExistsError) {
-      response.status(409).json({ error: "Username already exists" });
-      return;
-    }
-
-    throw error;
+  const insertResult = await insertUser({
+    id: randomUUID(),
+    username,
+    password_hash: await bcrypt.hash(password, 10),
+  });
+  if (insertResult.kind === "username-already-exists") {
+    sendErrorResponse(response, 409, "Username already exists");
+    return;
   }
 
   response.status(201).json({ message: "User registered" });
@@ -77,7 +79,11 @@ export function createLoginController(config: AppConfig): RequestHandler {
     const loginRequest = LoginRequestSchema.safeParse(request.body);
 
     if (!loginRequest.success) {
-      response.status(400).json({ error: "Invalid login request" });
+      sendValidationError(
+        response,
+        "Invalid login request",
+        loginRequest.error,
+      );
       return;
     }
 
@@ -86,7 +92,7 @@ export function createLoginController(config: AppConfig): RequestHandler {
     const user = await getUserByUsername(username);
 
     if (!user || !(await bcrypt.compare(password, user.password_hash))) {
-      response.status(401).json({ error: "Invalid username or password" });
+      sendErrorResponse(response, 401, "Invalid username or password");
       return;
     }
 

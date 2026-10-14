@@ -1,5 +1,6 @@
 import { load } from "cheerio";
 import type { RequestHandler } from "express";
+import { sendErrorResponse } from "../../shared/error-response.js";
 
 const venueDirectoryUrl = "https://utasbot.dev/static/venue-hire.html";
 
@@ -13,15 +14,23 @@ export function createScrapeRoomsController(
         signal: AbortSignal.timeout(10_000),
       });
       if (!page.ok) {
-        response
-          .status(500)
-          .json({ error: "Unable to fetch the scrape website" });
+        console.error("Venue directory request failed", {
+          method: request.method,
+          path: request.originalUrl,
+          upstreamStatus: page.status,
+        });
+        sendErrorResponse(response, 500, "Unable to fetch the scrape website");
         return;
       }
 
       html = await page.text();
-    } catch {
-      response.status(500).json({ error: "Unexpected error occurred" });
+    } catch (error) {
+      console.error("Unable to fetch venue directory", {
+        method: request.method,
+        path: request.originalUrl,
+        error,
+      });
+      sendErrorResponse(response, 500, "Unexpected error occurred");
       return;
     }
 
