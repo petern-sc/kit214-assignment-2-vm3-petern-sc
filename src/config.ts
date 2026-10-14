@@ -1,7 +1,7 @@
 export type AppConfig = {
   jwtSecret: string;
   port: number;
-  publicBaseUrl: string;
+  roomApiUrl: string;
   tls?: {
     certPath: string;
     keyPath: string;
@@ -19,14 +19,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error("PORT must be an integer between 1 and 65535");
   }
 
-  const publicBaseUrl = env.PUBLIC_BASE_URL;
-  if (!publicBaseUrl) {
-    throw new Error("PUBLIC_BASE_URL must be set");
+  const roomApiUrl = env.ROOM_API_URL;
+  if (!roomApiUrl) {
+    throw new Error("ROOM_API_URL must be set");
   }
   const config: AppConfig = {
     jwtSecret,
     port,
-    publicBaseUrl,
+    roomApiUrl,
   };
 
   if (env.APP_ENV === "development") {

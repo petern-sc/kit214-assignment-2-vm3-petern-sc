@@ -1,10 +1,10 @@
-import {load} from "cheerio";
-import type {RequestHandler} from "express";
+import { load } from "cheerio";
+import type { RequestHandler } from "express";
 
 const venueDirectoryUrl = "https://utasbot.dev/static/venue-hire.html";
 
 export function createScrapeRoomsController(
-  publicBaseUrl: string,
+  roomApiUrl: string,
 ): RequestHandler {
   return async (request, response) => {
     let html: string;
@@ -13,7 +13,9 @@ export function createScrapeRoomsController(
         signal: AbortSignal.timeout(10_000),
       });
       if (!page.ok) {
-        response.status(500).json({ error: "Unable to fetch the scrape website" });
+        response
+          .status(500)
+          .json({ error: "Unable to fetch the scrape website" });
         return;
       }
 
@@ -23,11 +25,10 @@ export function createScrapeRoomsController(
       return;
     }
 
-    const targetUrl = new URL("/rooms", publicBaseUrl).toString();
     const userId = response.locals.userId as string;
     const rooms = extractRoomNames(html).map((name) => ({
       name,
-      targetUrl,
+      targetUrl: roomApiUrl,
       interfaceType: "whiteboard" as const,
       userId,
     }));

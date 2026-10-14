@@ -19,7 +19,7 @@ export function createRoomsRoutes(config: AppConfig) {
   roomsRouter.get(
     "/scrape",
     requireAuthMiddleware,
-    createScrapeRoomsController(config.publicBaseUrl),
+    createScrapeRoomsController(config.roomApiUrl),
   );
   roomsRouter.get("/rooms/:id", getRoomByIdController);
   roomsRouter.put("/rooms/:id", updateRoomController);
