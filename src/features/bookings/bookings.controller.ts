@@ -15,6 +15,10 @@ import {
   listBookings,
   updateBooking,
 } from "./bookings.repository.js";
+import {
+  sendErrorResponse,
+  sendValidationError,
+} from "../../shared/error-response.js";
 
 export const listBookingsController: RequestHandler = async (
   _request,
@@ -30,7 +34,7 @@ export const getBookingByIdController: RequestHandler<{ id: string }> = async (
 ) => {
   const booking = await getBookingById(request.params.id);
   if (!booking) {
-    response.status(404).json({ error: "Booking not found" });
+    sendErrorResponse(response, 404, "Booking not found");
     return;
   }
 
@@ -42,7 +46,7 @@ export const deleteBookingByIdController: RequestHandler<{
 }> = async (request, response) => {
   const deleted = await deleteBooking(request.params.id);
   if (!deleted) {
-    response.status(404).json({ error: "Booking not found" });
+    sendErrorResponse(response, 404, "Booking not found");
     return;
   }
 
@@ -55,7 +59,7 @@ export const createBookingController: RequestHandler = async (
 ) => {
   const result = CreateBookingInputSchema.safeParse(request.body);
   if (!result.success) {
-    response.status(400).json({ error: "Invalid booking input" });
+    sendValidationError(response, "Invalid booking input", result.error);
     return;
   }
 
@@ -70,12 +74,10 @@ export const createBookingController: RequestHandler = async (
   const createResult = await createBooking(booking);
   switch (createResult.kind) {
     case "room-not-found":
-      response.status(404).json({ error: "Room not found" });
+      sendErrorResponse(response, 404, "Room not found");
       return;
     case "overlap-conflict":
-      response
-        .status(409)
-        .json({ error: "Booking overlaps an existing booking" });
+      sendErrorResponse(response, 409, "Booking overlaps an existing booking");
       return;
     case "created":
       response.status(201).json(createResult.booking);
@@ -92,13 +94,13 @@ export const updateBookingByIdController: RequestHandler<{
 }> = async (request, response) => {
   const existingBooking = await getBookingById(request.params.id);
   if (!existingBooking) {
-    response.status(404).json({ error: "Booking not found" });
+    sendErrorResponse(response, 404, "Booking not found");
     return;
   }
 
   const result = UpdateBookingInputSchema.safeParse(request.body);
   if (!result.success) {
-    response.status(400).json({ error: "Invalid booking input" });
+    sendValidationError(response, "Invalid booking input", result.error);
     return;
   }
 
@@ -110,12 +112,10 @@ export const updateBookingByIdController: RequestHandler<{
   const createResult = await updateBooking(updateBookingRequest);
   switch (createResult.kind) {
     case "booking-not-found":
-      response.status(404).json({ error: "Booking not found" });
+      sendErrorResponse(response, 404, "Booking not found");
       return;
     case "overlap-conflict":
-      response
-        .status(409)
-        .json({ error: "Booking overlaps an existing booking" });
+      sendErrorResponse(response, 409, "Booking overlaps an existing booking");
       return;
     case "updated":
       response.status(200).json(createResult.booking);
@@ -133,7 +133,7 @@ export const getBookingStatusController: RequestHandler = async (
 ) => {
   const result = GetBookingStatusInputSchema.safeParse(request.body);
   if (!result.success) {
-    response.status(400).json({ error: "Invalid booking status input" });
+    sendValidationError(response, "Invalid booking status input", result.error);
     return;
   }
 
