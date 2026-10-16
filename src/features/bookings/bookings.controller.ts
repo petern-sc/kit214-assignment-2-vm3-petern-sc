@@ -44,12 +44,18 @@ export const getBookingByIdController: RequestHandler<{ id: string }> = async (
 export const deleteBookingByIdController: RequestHandler<{
   id: string;
 }> = async (request, response) => {
-  const deleted = await deleteBooking(request.params.id);
-  if (!deleted) {
+  const booking = await getBookingById(request.params.id);
+  if (!booking) {
     sendErrorResponse(response, 404, "Booking not found");
     return;
   }
 
+  if (booking.userId !== response.locals.userId) {
+    sendErrorResponse(response, 403, "User is not allowed to delete this booking");
+    return;
+  }
+
+  await deleteBooking(request.params.id);
   response.status(204).end();
 };
 
