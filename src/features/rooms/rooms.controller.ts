@@ -10,7 +10,6 @@ import {
 import {
   CreateRoomInputSchema,
   UpdateRoomInputSchema,
-  type CreateRoomInput,
   type Room,
 } from "./models/room.js";
 import {

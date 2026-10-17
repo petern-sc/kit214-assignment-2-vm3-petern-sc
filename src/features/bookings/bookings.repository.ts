@@ -66,6 +66,7 @@ export async function updateBooking(
     const isOverlap = await hasBookingOverlap(
       trx,
       existingBooking.room_id,
+      existingBooking.id,
       new Date(booking.startTime),
       new Date(booking.endTime),
     );
@@ -119,6 +120,7 @@ export async function createBooking(
     const isOverlap = await hasBookingOverlap(
       trx,
       booking.roomId,
+      null,
       new Date(booking.startTime),
       new Date(booking.endTime),
     );
@@ -142,17 +144,22 @@ async function insertBooking(
 export async function hasBookingOverlap(
   trx: Knex.Transaction,
   roomId: string,
+  bookingId: string | null,
   startTime: Date,
   endTime: Date,
 ): Promise<boolean> {
   // Reference: https://stackoverflow.com/questions/25549765/find-booking-overlaps-to-check-dates-availability
-  const overlappingBooking = await trx<BookingRecord>("bookings")
+  const query = trx<BookingRecord>("bookings")
     .select("id")
     .where({ room_id: roomId })
     .where("start_time", "<", endTime)
     .where("end_time", ">", startTime)
-    .first();
 
+  if (bookingId !== null) {
+    query.whereNot("id", bookingId);
+  }
+
+  const overlappingBooking = await query.first();
   return overlappingBooking !== undefined;
 }
 

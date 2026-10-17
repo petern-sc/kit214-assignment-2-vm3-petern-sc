@@ -14,7 +14,7 @@ export function createRoomsRoutes(config: AppConfig) {
   const roomsRouter = Router();
   const requireAuthMiddleware = createRequireAuth(config);
 
-  roomsRouter.post("/rooms", createRoomController);
+  roomsRouter.post("/rooms", requireAuthMiddleware, createRoomController);
   roomsRouter.get("/rooms", listRoomsController);
   roomsRouter.get(
     "/scrape",
@@ -22,7 +22,7 @@ export function createRoomsRoutes(config: AppConfig) {
     createScrapeRoomsController(config.roomApiUrl),
   );
   roomsRouter.get("/rooms/:id", getRoomByIdController);
-  roomsRouter.put("/rooms/:id", updateRoomController);
+  roomsRouter.put("/rooms/:id", requireAuthMiddleware, updateRoomController);
   roomsRouter.delete(
     "/rooms/:id",
     requireAuthMiddleware,
