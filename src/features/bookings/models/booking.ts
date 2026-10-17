@@ -25,18 +25,26 @@ export const CreateBookingInputSchema = z
     roomId: z.uuid(),
     startTime: z.iso.datetime(),
     endTime: z.iso.datetime(),
-  });
-
-export type CreateBookingInput = z.infer<typeof CreateBookingInputSchema>;
+  })
+  .refine(
+    ({ startTime, endTime }) => {
+      return Date.parse(endTime) > Date.parse(startTime);
+    },
+    { message: "End time must be after start time", path: ["endTime"] },
+  );
 
 export const UpdateBookingInputSchema = z
   .object({
     name: z.string().min(3),
     startTime: z.iso.datetime(),
     endTime: z.iso.datetime(),
-  });
-
-export type UpdateBookingInput = z.infer<typeof UpdateBookingInputSchema>;
+  })
+  .refine(
+    ({ startTime, endTime }) => {
+      return Date.parse(endTime) > Date.parse(startTime);
+    },
+    { message: "End time must be after start time", path: ["endTime"] },
+  );
 
 export type UpdateBookingRequest = {
   id: string;
@@ -45,9 +53,6 @@ export type UpdateBookingRequest = {
   endTime: string;
 };
 
-export const GetBookingStatusInputSchema = z
-  .object({
-    roomId: z.uuid(),
-  });
-
-export type GetBookingStatusInput = z.infer<typeof GetBookingStatusInputSchema>;
+export const GetBookingStatusInputSchema = z.object({
+  roomId: z.uuid(),
+});

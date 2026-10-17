@@ -104,6 +104,15 @@ export const updateBookingByIdController: RequestHandler<{
     return;
   }
 
+  if (existingBooking.userId !== response.locals.userId) {
+    sendErrorResponse(
+      response,
+      403,
+      "User is not allowed to update this booking",
+    );
+    return;
+  }
+
   const result = UpdateBookingInputSchema.safeParse(request.body);
   if (!result.success) {
     sendValidationError(response, "Invalid booking input", result.error);
