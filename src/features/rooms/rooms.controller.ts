@@ -85,7 +85,7 @@ export const updateRoomController: RequestHandler<{ id: string }> = async (
 
   switch (updateRoomResult.kind) {
     case "updated":
-      response.status(200).json(updateRoomResult);
+      response.status(200).json(updateRoomResult.room);
       return;
     case "room-not-found":
       sendErrorResponse(response, 404, "Room not found");
