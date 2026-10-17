@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS rooms (
   id CHAR(36) NOT NULL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   target_url VARCHAR(2048) NOT NULL,
-  interface_type VARCHAR(100) NOT NULL
+  interface_type VARCHAR(100) NOT NULL,
+  CONSTRAINT room_name_unique UNIQUE (name)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS users (

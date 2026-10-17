@@ -1,4 +1,5 @@
 import { database } from "../../shared/database.js";
+import { isDuplicateKeyError } from "../../shared/database-errors.js";
 import type { Room, RoomRecord } from "./models/room.js";
 
 function toRoomRecord(room: Room): RoomRecord {
@@ -19,10 +20,20 @@ function toRoom(record: RoomRecord): Room {
   };
 }
 
-export async function insertRoom(room: Room): Promise<Room> {
-  await database<RoomRecord>("rooms").insert(toRoomRecord(room));
+export type InsertRoomResult =
+  { kind: "created"; room: Room } | { kind: "duplicate-room-name" };
 
-  return room;
+export async function insertRoom(room: Room): Promise<InsertRoomResult> {
+  try {
+    await database<RoomRecord>("rooms").insert(toRoomRecord(room));
+    return { kind: "created", room };
+  } catch (error) {
+    if (isDuplicateKeyError(error)) {
+      return { kind: "duplicate-room-name" };
+    }
+
+    throw error;
+  }
 }
 
 export async function listRooms(): Promise<Room[]> {
@@ -45,19 +56,32 @@ export async function getRoomById(id: string): Promise<Room | null> {
   return record ? toRoom(record) : null;
 }
 
-export async function updateRoom(room: Room): Promise<Room | null> {
+export type UpdateRoomResult =
+  | { kind: "room-not-found" }
+  | { kind: "duplicate-room-name" }
+  | { kind: "updated"; room: Room };
+
+export async function updateRoom(room: Room): Promise<UpdateRoomResult> {
   const record = toRoomRecord(room);
   const { id } = record;
 
   return database.transaction(async (trx) => {
-    await trx<RoomRecord>("rooms").where({ id }).update(record);
+    try {
+      await trx<RoomRecord>("rooms").where({ id }).update(record);
+      const updatedRecord = await trx<RoomRecord>("rooms")
+        .select("id", "name", "target_url", "interface_type")
+        .where({ id })
+        .first();
 
-    const updatedRecord = await trx<RoomRecord>("rooms")
-      .select("id", "name", "target_url", "interface_type")
-      .where({ id })
-      .first();
-
-    return updatedRecord ? toRoom(updatedRecord) : null;
+      return updatedRecord
+        ? { kind: "updated", room: toRoom(record) }
+        : { kind: "room-not-found" };
+    } catch (error) {
+      if (isDuplicateKeyError(error)) {
+        return { kind: "duplicate-room-name" };
+      }
+      throw error;
+    }
   });
 }
 

@@ -26,11 +26,6 @@ export const listRoomsController: RequestHandler = async (
   response.status(200).json(rooms);
 };
 
-async function createRoom(input: CreateRoomInput): Promise<Room> {
-  const room: Room = { id: randomUUID(), ...input };
-  return insertRoom(room);
-}
-
 export const createRoomController: RequestHandler = async (
   request,
   response,
@@ -41,8 +36,17 @@ export const createRoomController: RequestHandler = async (
     return;
   }
 
-  const room = await createRoom(result.data);
-  response.status(201).json(room);
+  const room: Room = { id: randomUUID(), ...result.data };
+
+  const insertRoomResult = await insertRoom(room);
+  switch (insertRoomResult.kind) {
+    case "created":
+      response.status(201).json(room);
+      return;
+    case "duplicate-room-name":
+      sendErrorResponse(response, 409, "Room name already exists");
+      return;
+  }
 };
 
 export const getRoomByIdController: RequestHandler<{ id: string }> = async (
@@ -75,15 +79,24 @@ export const updateRoomController: RequestHandler<{ id: string }> = async (
     return;
   }
 
-  const updatedRoom = await updateRoom({
+  const updateRoomResult = await updateRoom({
     id: request.params.id,
     ...roomRequest.data,
   });
 
-  if (!updatedRoom) {
-    sendErrorResponse(response, 404, "Room not found");
-  } else {
-    response.status(200).json(updatedRoom);
+  switch (updateRoomResult.kind) {
+    case "updated":
+      response.status(200).json(updateRoomResult);
+      return;
+    case "room-not-found":
+      sendErrorResponse(response, 404, "Room not found");
+      return;
+    case "duplicate-room-name":
+      sendErrorResponse(response, 409, "Room name already exists");
+      return;
+    default:
+      sendErrorResponse(response, 500, "Internal server error");
+      return;
   }
 };
 
@@ -97,5 +110,5 @@ export const deleteRoomByIdController: RequestHandler<{ id: string }> = async (
     return;
   }
 
-  response.status(200);
+  response.status(204).end();
 };
