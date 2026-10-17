@@ -7,6 +7,7 @@ import infoRoutes from "./features/info/info.routes.js";
 import { createRoomsRoutes } from "./features/rooms/rooms.routes.js";
 import { corsMiddleware } from "./shared/cors.js";
 import { errorHandler } from "./shared/error-handler.js";
+import { sendErrorResponse } from "./shared/error-response.js";
 
 export function createApp(config: AppConfig) {
   const app = express();
@@ -24,6 +25,9 @@ export function createApp(config: AppConfig) {
 
   app.use(infoRoutes);
   app.use(createRoomsRoutes(config));
+  app.use((_request, response) => {
+    sendErrorResponse(response, 404, "Endpoint not found");
+  });
   app.use(errorHandler);
 
   return app;

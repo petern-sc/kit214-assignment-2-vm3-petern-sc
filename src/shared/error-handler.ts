@@ -14,6 +14,17 @@ export const errorHandler: ErrorRequestHandler = (
     return;
   }
 
+  if (
+    error instanceof SyntaxError &&
+    "type" in error &&
+    error.type === "entity.parse.failed" &&
+    "status" in error &&
+    error.status === 400
+  ) {
+    sendErrorResponse(response, 400, "Malformed JSON request body");
+    return;
+  }
+
   console.error("Unhandled request error", {
     method: request.method,
     path: request.originalUrl,
