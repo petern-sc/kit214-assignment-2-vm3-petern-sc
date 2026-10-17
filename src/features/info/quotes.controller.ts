@@ -8,6 +8,6 @@ interface Quote {
 const quotableClient = new HttpClient("https://dummyjson.com");
 
 export const getRandomQuote: RequestHandler = async (_request, response) => {
-  const { quote } = await quotableClient.get<Quote>("/quotes/1");
+  const { quote } = await quotableClient.get<Quote>("/quotes/random");
   response.status(418).json({ quote });
 };
